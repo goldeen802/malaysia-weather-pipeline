@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+keys/
+*.json.key
+.DS_Store
+target/
+dbt_packages/
+logs/
