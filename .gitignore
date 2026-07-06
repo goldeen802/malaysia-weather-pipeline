@@ -8,6 +8,7 @@ gcp-key.json
 *-sa-key.json
 service-account*.json
 credentials*.json
+my-weather-tracker-*.json
 .DS_Store
 target/
 dbt_packages/
