@@ -36,14 +36,31 @@ that wouldn't otherwise exist" story is the project's core selling point in inte
   because the Weather API refreshes several times daily — the freshest source that justifies
   a daily scheduled pipeline.
 
-## Roadmap
-- **Phase 1 (current):** thin end-to-end slice — Python extract -> BigQuery raw -> one dbt
-  staging model -> one Looker Studio chart. See `docs/plans/2026-07-06-weather-pipeline-phase1.md`.
-- **Phase 2:** forecast-vs-actual accuracy marts + dbt tests + a PySpark aggregation.
-- **Phase 3:** Airflow orchestration, polished dashboard, README + demo GIF.
+## Progress (as of 2026-07-06)
+- **Phase 1 — DONE:** Python ELT -> BigQuery `weather_raw.forecast`, `stg_weather_forecast`,
+  unit + dbt tests, GitHub Actions daily schedule.
+- **Phase 2 — DONE:** `mart_weather_daily` (English conditions via `condition_category` macro
+  + `temp_range`), `int_forecast_snapshots` + `mart_forecast_accuracy`, PySpark job
+  `spark_jobs/forecast_stats.py` (runs in CI, writes `spark_location_stats`). 16 dbt tests,
+  5 unit tests, all passing.
+- **Phase 3 — NEXT (time-gated):** build the Looker Studio dashboard. `mart_forecast_accuracy`
+  starts populating **2026-07-07** and is worth visualizing from about **2026-07-13** (a full
+  week gives lead times 1-6 across several target dates). Optional: Airflow for the keyword.
 - **Phase 4 (stretch):** near-real-time **transit reliability** from data.gov.my GTFS-Realtime
   (live vehicle positions every 30s) into the same BigQuery + dbt + Looker backbone. Delays
   must be *derived* vs. the static timetable (official trip-updates feed not live yet).
+
+## Deployment facts
+- **Repo:** https://github.com/goldeen802/malaysia-weather-pipeline (public, branch `main`).
+- **Auto-run:** GitHub Actions `.github/workflows/daily.yml` runs daily at 09:00 MYT
+  (cron `0 1 * * *` UTC): tests -> load -> dbt (`--target ci`) -> PySpark. Runs in GitHub's
+  cloud (laptop off is fine); appends one ~2,520-row snapshot/day. No manual action needed.
+  Note: GitHub pauses schedules after ~60 days of repo inactivity; any commit/manual run resets it.
+- **Auth:** CI uses a GCP service-account key in the `GCP_SA_KEY` GitHub secret (+ `GCP_PROJECT`
+  secret). The key file itself lives OUTSIDE the repo at `C:\Users\7463X33\Downloads\gcp-keys\`.
+  Local dev uses `gcloud auth application-default login` (ADC).
+- **BigQuery:** project `my-weather-tracker-501611`, datasets `weather_raw` + `weather_staging`,
+  region `asia-southeast1`. Well within the always-free tier.
 
 ## Tech stack
 Python 3.11+, `requests`, `google-cloud-bigquery`, `python-dotenv`, `pytest`, `responses`,
