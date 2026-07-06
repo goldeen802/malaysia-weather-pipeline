@@ -1,0 +1,10 @@
+weather:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT') }}"
+      dataset: weather_staging
+      location: asia-southeast1
+      threads: 4
