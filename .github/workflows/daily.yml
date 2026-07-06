@@ -37,3 +37,15 @@ jobs:
         run: |
           dbt run  --profiles-dir . --target ci
           dbt test --profiles-dir . --target ci
+
+      - name: Set up Java (for Spark)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Spark dependencies
+        run: pip install "pyspark>=3.5,<4" pandas "db-dtypes>=1.2" pyarrow
+
+      - name: PySpark aggregation
+        run: python spark_jobs/forecast_stats.py
