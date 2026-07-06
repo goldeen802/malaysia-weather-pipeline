@@ -6,5 +6,7 @@ models:
   weather:
     staging:
       +materialized: view
+    intermediate:
+      +materialized: view
     marts:
       +materialized: view

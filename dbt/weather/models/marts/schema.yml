@@ -26,3 +26,21 @@ models:
         tests:
           - accepted_values:
               values: ['Thunderstorms', 'Rain', 'No rain', 'Windy', 'Cloudy', 'Other']
+
+  - name: mart_forecast_accuracy
+    description: >
+      Ahead-of-time forecasts compared to the same-day (lead 0) forecast for each
+      location and target date, with temperature errors and condition match by lead time.
+    columns:
+      - name: location_id
+        tests:
+          - not_null
+      - name: target_date
+        tests:
+          - not_null
+      - name: lead_time_days
+        tests:
+          - not_null
+          - accepted_values:
+              quote: false
+              values: [1, 2, 3, 4, 5, 6]

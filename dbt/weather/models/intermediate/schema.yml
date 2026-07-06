@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: int_forecast_snapshots
+    description: >
+      One representative forecast per location, target date, and issue date, with
+      the lead time (days ahead) it was made.
+    columns:
+      - name: location_id
+        tests:
+          - not_null
+      - name: target_date
+        tests:
+          - not_null
+      - name: issue_date
+        tests:
+          - not_null
+      - name: lead_time_days
+        tests:
+          - not_null
