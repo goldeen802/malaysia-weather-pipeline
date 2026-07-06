@@ -4,6 +4,10 @@ __pycache__/
 .env
 keys/
 *.json.key
+gcp-key.json
+*-sa-key.json
+service-account*.json
+credentials*.json
 .DS_Store
 target/
 dbt_packages/

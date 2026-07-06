@@ -1,0 +1,39 @@
+name: daily-weather-pipeline
+
+on:
+  schedule:
+    - cron: "0 1 * * *"   # 01:00 UTC = 09:00 Malaysia, daily
+  workflow_dispatch: {}    # allow manual runs from the Actions tab
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    env:
+      GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+      GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/gcp-key.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write GCP service-account key
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: printf '%s' "$GCP_SA_KEY" > "$GOOGLE_APPLICATION_CREDENTIALS"
+
+      - name: Unit tests
+        run: python -m pytest -q
+
+      - name: Extract + load (snapshot forecast to BigQuery)
+        run: python -m weather_pipeline.main
+
+      - name: dbt build + test
+        working-directory: dbt/weather
+        run: |
+          dbt run  --profiles-dir . --target ci
+          dbt test --profiles-dir . --target ci

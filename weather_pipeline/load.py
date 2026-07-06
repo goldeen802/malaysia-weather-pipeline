@@ -19,6 +19,19 @@ def get_client(project: str) -> bigquery.Client:
     return bigquery.Client(project=project)
 
 
+def ensure_dataset(
+    client: bigquery.Client, dataset_id: str, location: str = "asia-southeast1"
+) -> None:
+    """Create the dataset if it does not already exist (idempotent).
+
+    Lets the pipeline run from a clean project (e.g. in CI) without a manual
+    dataset-creation step.
+    """
+    dataset = bigquery.Dataset(dataset_id)
+    dataset.location = location
+    client.create_dataset(dataset, exists_ok=True)
+
+
 def load_rows(client: bigquery.Client, table_id: str, rows: list[dict]) -> int:
     """Append rows to the raw forecast table, creating it if needed.
 
