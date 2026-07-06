@@ -8,3 +8,4 @@ keys/
 target/
 dbt_packages/
 logs/
+.user.yml
