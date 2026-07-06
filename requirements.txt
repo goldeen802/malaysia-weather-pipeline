@@ -1,0 +1,6 @@
+requests>=2.32,<3
+google-cloud-bigquery>=3.25,<4
+python-dotenv>=1.0,<2
+pytest>=8.3,<9
+responses>=0.25,<1
+dbt-bigquery>=1.9,<2

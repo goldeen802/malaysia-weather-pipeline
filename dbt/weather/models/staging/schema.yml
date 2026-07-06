@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: weather_raw
+    database: "{{ env_var('GCP_PROJECT') }}"
+    schema: weather_raw
+    tables:
+      - name: forecast
+
+models:
+  - name: stg_weather_forecast
+    description: "Latest snapshot per location per forecast date."
+    columns:
+      - name: location_id
+        tests:
+          - not_null
+      - name: forecast_date
+        tests:
+          - not_null
+      - name: max_temp
+        tests:
+          - not_null

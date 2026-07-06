@@ -1,0 +1,8 @@
+name: 'weather'
+version: '1.0.0'
+profile: 'weather'
+model-paths: ["models"]
+models:
+  weather:
+    staging:
+      +materialized: view
