@@ -6,20 +6,29 @@ The API only exposes the *current* forecast, so this pipeline snapshots it daily
 (stamping each row with `ingested_at`) and accumulates the historical record needed
 to measure **forecast accuracy over time** — data that would not otherwise exist.
 
-## Architecture (Phase 1)
+## Architecture
 
 ```
 data.gov.my Weather API
    --(Python: extract + load)-->  BigQuery  weather_raw.forecast
-   --(dbt: staging model + tests)-->  weather_staging.stg_weather_forecast
+   --(dbt: staging / intermediate / marts + tests)-->  weather_staging.*
+   --(PySpark aggregation, in CI)-->  weather_staging.spark_location_stats
    --(Looker Studio)-->  dashboard
+   Orchestration: GitHub Actions (daily 09:00 MYT)
 ```
 
 - **Extract / Load** — `weather_pipeline/` (Python): fetch the 7-day forecast, flatten each
-  record, append to BigQuery with a snapshot timestamp.
-- **Transform** — `dbt/weather/`: `stg_weather_forecast` cleans and de-duplicates to the
-  latest snapshot per location per forecast date; `not_null` tests enforce data quality.
-- **Serve** — a Looker Studio chart on the staging view.
+  record, append to BigQuery with a snapshot timestamp (`ingested_at`).
+- **Transform** — `dbt/weather/`:
+  - `stg_weather_forecast` — cleans + de-duplicates to the latest snapshot per location/date.
+  - `mart_weather_daily` — English condition categories (via a reusable macro) + `temp_range`.
+  - `int_forecast_snapshots` — adds issue date + lead time per forecast.
+  - `mart_forecast_accuracy` — forecast-vs-actual temp error and condition match by lead time.
+  - 16 data-quality tests (`not_null`, `accepted_values`).
+- **Spark** — `spark_jobs/forecast_stats.py`: per-location statistics via the Spark
+  DataFrame API + a window function; runs on the CI runner, writes back to BigQuery.
+- **Orchestration** — `.github/workflows/daily.yml`: daily run (tests → load → dbt → Spark).
+- **Serve** — Looker Studio on the marts.
 
 ## Tech stack
 Python 3.13, `requests`, `google-cloud-bigquery`, `dbt-bigquery`, Looker Studio.
@@ -65,6 +74,8 @@ _Deferred: the Looker Studio dashboard will be built once the dataset is enriche
 forecast-accuracy view._
 
 ## Roadmap
-- **Phase 2:** forecast-vs-actual accuracy marts, more dbt tests, a PySpark aggregation.
-- **Phase 3:** Airflow orchestration, polished dashboard, demo GIF.
+- **Phase 1 — done:** ELT to BigQuery, staging model, tests, GitHub Actions daily schedule.
+- **Phase 2 — done:** English-condition enrichment, forecast-accuracy marts, PySpark aggregation.
+- **Phase 3:** polished Looker Studio dashboard (once accuracy data accumulates), demo GIF;
+  optional Airflow orchestration for the résumé keyword.
 - **Phase 4 (stretch):** near-real-time transit reliability from data.gov.my GTFS-Realtime.
