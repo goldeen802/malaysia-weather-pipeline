@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: mart_weather_daily
+    description: >
+      Daily forecast per location, enriched with temperature range and English
+      condition categories derived from the raw Malay forecast text.
+    columns:
+      - name: temp_range
+        description: "max_temp - min_temp, in degrees Celsius."
+        tests:
+          - not_null
+      - name: summary_condition
+        tests:
+          - accepted_values:
+              values: ['Thunderstorms', 'Rain', 'No rain', 'Windy', 'Cloudy', 'Other']
+      - name: morning_condition
+        tests:
+          - accepted_values:
+              values: ['Thunderstorms', 'Rain', 'No rain', 'Windy', 'Cloudy', 'Other']
+      - name: afternoon_condition
+        tests:
+          - accepted_values:
+              values: ['Thunderstorms', 'Rain', 'No rain', 'Windy', 'Cloudy', 'Other']
+      - name: night_condition
+        tests:
+          - accepted_values:
+              values: ['Thunderstorms', 'Rain', 'No rain', 'Windy', 'Cloudy', 'Other']

@@ -6,3 +6,5 @@ models:
   weather:
     staging:
       +materialized: view
+    marts:
+      +materialized: view
